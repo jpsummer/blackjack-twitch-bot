@@ -1,0 +1,17 @@
+{
+  "name": "twitch-bj-bot",
+  "version": "0.0.0",
+  "description": "A Blackjack Game Bot for Twitch",
+  "main": "src/bot.js",
+  "type": "module",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jacob Somerville",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^14.2.0",
+    "tmi.js": "^1.8.5"
+  }
+}
