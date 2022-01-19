@@ -1,9 +1,11 @@
 import tmi from 'tmi.js';
 import 'dotenv/config';
+import Blackjack from './blackjack.js';
 
 // Define configuration options
-const opts = {
-    options: {debug: false, joinInterval: 300 },
+const options = {
+    options: { debug: false, joinInterval: 300 },
+    connection: { reconnect: true, secure: true },
     identity: {
       username: process.env.BOT_USERNAME,
       password: process.env.OAUTH_TOKEN
@@ -14,7 +16,7 @@ const opts = {
   };
 
 // Create a client with our options
-const client = new tmi.client(opts);
+const client = new tmi.client(options);
 
 // Register our event handlers (defined below)
 client.on('message', onMessageHandler);
@@ -25,23 +27,22 @@ client.connect();
 
 
 // Deck Variable containing all cards of a Standard Playing Deck
-const initDeck = [  
-    {'card': 'Ace', 'suit': 'Hearts'},      {'card': 'Ace', 'suit': 'Diamonds'},      {'card': 'Ace', 'suit': 'Clubs'},      {'card': 'Ace', 'suit': 'Spades'},
-    {'card': 'King', 'suit': 'Hearts'},     {'card': 'King', 'suit': 'Diamonds'},     {'card': 'King', 'suit': 'Clubs'},     {'card': 'King', 'suit': 'Spades'},
-    {'card': 'Queen', 'suit': 'Hearts'},    {'card': 'Queen', 'suit': 'Diamonds'},    {'card': 'Queen', 'suit': 'Clubs'},    {'card': 'Queen', 'suit': 'Spades'},
-    {'card': 'Jack', 'suit': 'Hearts'},     {'card': 'Jack', 'suit': 'Diamonds'},     {'card': 'Jack', 'suit': 'Clubs'},     {'card': 'Jack', 'suit': 'Spades'},
-    {'card': '10', 'suit': 'Hearts'},       {'card': '10', 'suit': 'Diamonds'},       {'card': '10', 'suit': 'Clubs'},       {'card': '10', 'suit': 'Spades'},
-    {'card': '9', 'suit': 'Hearts'},        {'card': '9', 'suit': 'Diamonds'},        {'card': '9', 'suit': 'Clubs'},        {'card': '9', 'suit': 'Spades'},
-    {'card': '8', 'suit': 'Hearts'},        {'card': '8', 'suit': 'Diamonds'},        {'card': '8', 'suit': 'Clubs'},        {'card': '8', 'suit': 'Spades'},
-    {'card': '7', 'suit': 'Hearts'},        {'card': '7', 'suit': 'Diamonds'},        {'card': '7', 'suit': 'Clubs'},        {'card': '7', 'suit': 'Spades'},
-    {'card': '6', 'suit': 'Hearts'},        {'card': '6', 'suit': 'Diamonds'},        {'card': '6', 'suit': 'Clubs'},        {'card': '6', 'suit': 'Spades'},
-    {'card': '5', 'suit': 'Hearts'},        {'card': '5', 'suit': 'Diamonds'},        {'card': '5', 'suit': 'Clubs'},        {'card': '5', 'suit': 'Spades'},
-    {'card': '4', 'suit': 'Hearts'},        {'card': '4', 'suit': 'Diamonds'},        {'card': '4', 'suit': 'Clubs'},        {'card': '4', 'suit': 'Spades'},
-    {'card': '3', 'suit': 'Hearts'},        {'card': '3', 'suit': 'Diamonds'},        {'card': '3', 'suit': 'Clubs'},        {'card': '3', 'suit': 'Spades'},
-    {'card': '2', 'suit': 'Hearts'},        {'card': '2', 'suit': 'Diamonds'},        {'card': '2', 'suit': 'Clubs'},        {'card': '2', 'suit': 'Spades'}
+const initialDeck = [  
+    {'value': 'Ace', 'suit': 'Hearts'},      {'value': 'Ace', 'suit': 'Diamonds'},      {'value': 'Ace', 'suit': 'Clubs'},      {'value': 'Ace', 'suit': 'Spades'},
+    {'value': 'King', 'suit': 'Hearts'},     {'value': 'King', 'suit': 'Diamonds'},     {'value': 'King', 'suit': 'Clubs'},     {'value': 'King', 'suit': 'Spades'},
+    {'value': 'Queen', 'suit': 'Hearts'},    {'value': 'Queen', 'suit': 'Diamonds'},    {'value': 'Queen', 'suit': 'Clubs'},    {'value': 'Queen', 'suit': 'Spades'},
+    {'value': 'Jack', 'suit': 'Hearts'},     {'value': 'Jack', 'suit': 'Diamonds'},     {'value': 'Jack', 'suit': 'Clubs'},     {'value': 'Jack', 'suit': 'Spades'},
+    {'value': '10', 'suit': 'Hearts'},       {'value': '10', 'suit': 'Diamonds'},       {'value': '10', 'suit': 'Clubs'},       {'value': '10', 'suit': 'Spades'},
+    {'value': '9', 'suit': 'Hearts'},        {'value': '9', 'suit': 'Diamonds'},        {'value': '9', 'suit': 'Clubs'},        {'value': '9', 'suit': 'Spades'},
+    {'value': '8', 'suit': 'Hearts'},        {'value': '8', 'suit': 'Diamonds'},        {'value': '8', 'suit': 'Clubs'},        {'value': '8', 'suit': 'Spades'},
+    {'value': '7', 'suit': 'Hearts'},        {'value': '7', 'suit': 'Diamonds'},        {'value': '7', 'suit': 'Clubs'},        {'value': '7', 'suit': 'Spades'},
+    {'value': '6', 'suit': 'Hearts'},        {'value': '6', 'suit': 'Diamonds'},        {'value': '6', 'suit': 'Clubs'},        {'value': '6', 'suit': 'Spades'},
+    {'value': '5', 'suit': 'Hearts'},        {'value': '5', 'suit': 'Diamonds'},        {'value': '5', 'suit': 'Clubs'},        {'value': '5', 'suit': 'Spades'},
+    {'value': '4', 'suit': 'Hearts'},        {'value': '4', 'suit': 'Diamonds'},        {'value': '4', 'suit': 'Clubs'},        {'value': '4', 'suit': 'Spades'},
+    {'value': '3', 'suit': 'Hearts'},        {'value': '3', 'suit': 'Diamonds'},        {'value': '3', 'suit': 'Clubs'},        {'value': '3', 'suit': 'Spades'},
+    {'value': '2', 'suit': 'Hearts'},        {'value': '2', 'suit': 'Diamonds'},        {'value': '2', 'suit': 'Clubs'},        {'value': '2', 'suit': 'Spades'}
 ];
 
-var gameActive = false;
 
 
 /* 
@@ -51,7 +52,7 @@ var gameActive = false;
 // Durstenfeld shuffle to shuffle the deck of cards
 // Parameters: deck, the deck to be shuffled
 // Returns: deck, array of a shuffled copy of the deck
-function shuffle_deck(deck) {
+function shuffleDeck(deck) {
 
     let copy = JSON.parse(JSON.stringify(deck));
 
@@ -77,7 +78,7 @@ function shuffle_deck(deck) {
 // Durstenfeld shuffle to shuffle the deck of cards
 // Parameters: deck, the deck to be shuffled
 // Returns: deck, array of a shuffled deck
-function shuffle_deck(deck) {
+function shuffleDeck(deck) {
 
     //Iterate from bottom of deck to the top
     for (let i = deck.length - 1; i > 0; i--) {
@@ -99,15 +100,15 @@ function shuffle_deck(deck) {
 // Function to print the entire deck in console
 // Parameters: deck, deck to display
 // Returns: nothing
-function display_deck(channel, client, deck){
+function displayDeck(game, deck){
     for (const i in deck) {
         // Get Card Value
-        let card = deck[i]['card'];
+        let card = deck[i]['value'];
         // Get Suit
         let suit = deck[i]['suit'];
         // ace 1F0A1 king 1F0AE joker 1F0CF
         console.log(`${String.fromCodePoint (0x1F0CF)} ${parseInt(i)+1}: ${card} of ${suit}`);
-        //client.say(channel, `${String.fromCodePoint (0x1F0CF)} ${parseInt(i)+1}: ${card} of ${suit}`);
+        //game.client.say(game.channel, `${String.fromCodePoint (0x1F0CF)} ${parseInt(i)+1}: ${card} of ${suit}`);
     }
 }
 
@@ -115,53 +116,50 @@ function display_deck(channel, client, deck){
 // Function to get cards from hand and display in a string
 // Parameters: hand, an array that holds 2 card objects
 // Returns: Twitch message from bot displaying username and their hand
-function display_hand(channel, client, userstate, text, hand){
+function displayHand(game, text, hand){
     
     // Variable to store card and suit
     let cards = []
     let sep = String.fromCodePoint(0x1F0CF);
 
-    for (const i in hand){
+    for (const card of hand){
         let suit = '';
         /* 
-        if (hand[i]['suit'] == 'Hearts') {suit = String.fromCodePoint(0x2764)}
-        else if (hand[i]['suit'] == 'Diamonds') {suit = String.fromCodePoint(0x2666)}
-        else if (hand[i]['suit'] == 'Clubs') {suit = String.fromCodePoint(0x2663)}
-        else if (hand[i]['suit'] == 'Spades') {suit = String.fromCodePoint(0x2660)}
+        if (card['suit'] == 'Hearts') {suit = String.fromCodePoint(0x2764)}
+        else if (card['suit'] == 'Diamonds') {suit = String.fromCodePoint(0x2666)}
+        else if (card['suit'] == 'Clubs') {suit = String.fromCodePoint(0x2663)}
+        else if (card['suit'] == 'Spades') {suit = String.fromCodePoint(0x2660)}
          */
-        if (hand[i]['suit'] == 'Hearts') {suit = ':hearts:'}
-        else if (hand[i]['suit'] == 'Diamonds') {suit = ':diamonds:'}
-        else if (hand[i]['suit'] == 'Clubs') {suit = ':clubs:'}
-        else if (hand[i]['suit'] == 'Spades') {suit = ':spades:'}
+        if (card['suit'] == 'Hearts') {suit = ':hearts:'}
+        else if (card['suit'] == 'Diamonds') {suit = ':diamonds:'}
+        else if (card['suit'] == 'Clubs') {suit = ':clubs:'}
+        else if (card['suit'] == 'Spades') {suit = ':spades:'}
 
-        cards.push(`${hand[i]['card']} of ${suit}`);
+        cards.push(`${card['value']} of ${suit}`);
     }
 
-    client.say(channel, `${userstate.username} ${text} ${get_hand_total(hand)} ${sep} ${cards.join(` ${sep} `)}`);
+    game.client.say(game.channel, `${game.username} ${text} ${getHandTotal(hand)} ${sep} ${cards.join(` ${sep} `)}`);
 }
 
 
 // Function to calculate the total value of a hand
 // Parameters: hand, array variable to be calculated
 // Returns: The total value of the hand    
-function get_hand_total(hand){
+function getHandTotal(hand){
 
     // variable used to sum the total value of cards in list storing cards
     var total = 0
 
     // This for loop translates the Ten, Ace and Picture cards into int values
-    for (const i in hand){
-
-        // Variable to store card value
-        let c = hand[i]['card'];
+    for (const card of hand){
 
         // Convert Face cards to their int values
-        if (c == 'Jack') {total += 10;}
-        else if (c == 'Queen') {total += 10;}
-        else if (c == 'King') {total += 10;}
+        if (card['value'] == 'Jack') {total += 10;}
+        else if (card['value'] == 'Queen') {total += 10;}
+        else if (card['value'] == 'King') {total += 10;}
         // else if card is not ace, parse int from non-face cards
-        else if (c != 'Ace') {total += parseInt(c);}
-        else if (c == 'Ace'){
+        else if (card['value'] != 'Ace') {total += parseInt(card['value']);}
+        else if (card['value'] == 'Ace'){
             // If ace would cause you to bust, ace value is 1
             if (total >= 11){
                 total += 1;
@@ -178,49 +176,55 @@ function get_hand_total(hand){
 // Function to deal one card
 // Parameters: deck, an array containing all playing cards
 // Returns: card, an object containing card and suit
-function deal_one_card(deck){
+function dealOneCard(deck){
     // Return a card object
     return deck.shift();
 }
 
 
-function get_hit_choice(){
+function getHitChoice(){
 
 } 
 
 
-function play_player_hand(){
+function playPlayerHand(){
 
 }
 
 
-function play_dealer_hand(){
+function playDealerHand(){
 
 }
 
-function check_bust(){
+function checkBust(){
 
 }
 
 
-function check_win(){
+function checkWin(){
 
 }
 
-function init(channel, client, userstate, startDeck=initDeck){
-    var playerHand = []
-    var dealerHand = []
-    var gameActive = true;
+function initialize(channel, client, userstate){
 
-    var deck = shuffle_deck(startDeck);
+    const game = new Blackjack(channel, client, userstate, shuffleDeck(initialDeck));
 
-    display_deck(channel, client, deck);
+    // TODO
+    //SIGN A GAME WITH USERS USER ID, IF A GAME IS RUNNING, CANNOT START ANOTHER ONE
+    // IF NO GAME IS RUNNING CANNOT !HIT OR ANYTHING
+    
+
+
+
+
+    displayDeck(game, game.deck);
     for (let i=0; i<2; i++){
-        playerHand.push(deal_one_card(deck));
+        game.player_hand.push(dealOneCard(game.deck));
     }
-    display_deck(channel, client, deck);
+    displayDeck(game, game.deck);
 
-    display_hand(channel, client, userstate, 'you have', playerHand);
+    displayHand(game, 'you have', game.player_hand);
+    
 }
 
 
@@ -239,8 +243,8 @@ function onMessageHandler (channel, userstate, msg, self) {
     if(!(commandName.startsWith('!'))) {return;}
     
     // If !blackjack
-    else if (commandName === '!blackjack') {
-    init(channel, client, userstate);
+    else if (commandName === '!bj') {
+    initialize(channel, client, userstate);
     console.log(`* Executed ${commandName} command`);
     }
     // Else log unknown !command
