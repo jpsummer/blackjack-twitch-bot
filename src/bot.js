@@ -1,6 +1,10 @@
 import tmi from 'tmi.js';
 import 'dotenv/config';
+import cleanUp from 'node-cleanup';
 import Blackjack from './blackjack.js';
+
+
+
 
 // Define configuration options
 const options = {
@@ -183,7 +187,9 @@ function dealOneCard(deck){
 
 
 function getHitChoice(){
-
+        // TODO
+    //SIGN A GAME WITH USERS USER ID, IF A GAME IS RUNNING, CANNOT START ANOTHER ONE
+    // IF NO GAME IS RUNNING CANNOT !HIT OR ANYTHING
 } 
 
 
@@ -205,17 +211,13 @@ function checkWin(){
 
 }
 
+function checkGameRunning(){
+
+}
+
 function initialize(channel, client, userstate){
 
     const game = new Blackjack(channel, client, userstate, shuffleDeck(initialDeck));
-
-    // TODO
-    //SIGN A GAME WITH USERS USER ID, IF A GAME IS RUNNING, CANNOT START ANOTHER ONE
-    // IF NO GAME IS RUNNING CANNOT !HIT OR ANYTHING
-    
-
-
-
 
     displayDeck(game, game.deck);
     for (let i=0; i<2; i++){
@@ -258,3 +260,8 @@ function onMessageHandler (channel, userstate, message, self) {
 function onConnectedHandler (address, port) {
   console.log(`* Connected to ${address}:${port} \n* On Channels: ${client.getOptions()['channels']}`);
 }
+
+cleanUp(function (exitCode, signal) {
+    console.log(`* Exiting . . . . . . . . . . . . . . . . . .`)
+    cleanUp.uninstall();
+});
