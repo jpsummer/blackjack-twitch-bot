@@ -219,11 +219,11 @@ function initialize(channel, client, userstate){
 
     displayDeck(game, game.deck);
     for (let i=0; i<2; i++){
-        game.player_hand.push(dealOneCard(game.deck));
+        game.playerHand.push(dealOneCard(game.deck));
     }
     displayDeck(game, game.deck);
 
-    displayHand(game, 'you have', game.player_hand);
+    displayHand(game, 'you have', game.playerHand);
     
 }
 
@@ -233,11 +233,11 @@ function initialize(channel, client, userstate){
 
 
 // Called every time a message comes in
-function onMessageHandler (channel, userstate, msg, self) {
+function onMessageHandler (channel, userstate, message, self) {
   if (self) { return; } // Ignore messages from the bot
 
   // Remove whitespace from chat message
-  const commandName = msg.trim();
+  const commandName = message.trim();
 
     // If message doesnt start with a ! mark, ignore it
     if(!(commandName.startsWith('!'))) {return;}
@@ -255,6 +255,6 @@ function onMessageHandler (channel, userstate, msg, self) {
 
 
 // Called every time the bot connects to Twitch chat
-function onConnectedHandler (addr, port) {
-  console.log(`* Connected to ${addr}:${port} \n* On Channels: ${client.getOptions()['channels']}`);
+function onConnectedHandler (address, port) {
+  console.log(`* Connected to ${address}:${port} \n* On Channels: ${client.getOptions()['channels']}`);
 }
