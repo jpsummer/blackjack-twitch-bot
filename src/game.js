@@ -1,5 +1,6 @@
 export default function Game(channel, client, userstate){
 
+    this.active = false;
     this.channel = channel
     this.client = client
     this.username = userstate["display-name"]

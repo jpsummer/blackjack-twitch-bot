@@ -49,37 +49,6 @@ const initialDeck = [
 ];
 
 
-
-/* 
-
-        COPY ARRAY VERSION, DOESNT MODIFY ORIGINAL ARRAY
-
-// Durstenfeld shuffle to shuffle the deck of cards
-// Parameters: deck, the deck to be shuffled
-// Returns: deck, array of a shuffled copy of the deck
-function shuffleDeck(deck) {
-
-    let copy = JSON.parse(JSON.stringify(deck));
-
-    //Iterate from bottom of deck to the top
-    for (let i = copy.length - 1; i > 0; i--) {
-        
-        //Pick a random element from group of unshuffled elements
-        const j = Math.floor(Math.random() * (i + 1));
-
-        //Swap the picked element to the bottom of the deck, swapping it with an unshuffled element
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-        
-        //Swapping shuffled elements to the bottom of the deck while simulateously incrementing to the top of the deck
-        //Effectively will shuffle the deck from bottom to top
-    }
-    
-    return copy;
-}
- */
-
-
-
 // Durstenfeld shuffle to shuffle the deck of cards
 // Parameters: deck, the deck to be shuffled
 // Returns: deck, array of a shuffled deck
@@ -102,7 +71,7 @@ function shuffleDeck(deck) {
 }
 
 
-// Function to print the entire deck in console
+// Function to print the entire deck in console for debugging purposes
 // Parameters: deck, deck to display
 // Returns: nothing
 function displayDeck(game, deck){
@@ -111,39 +80,35 @@ function displayDeck(game, deck){
         let card = deck[i]['value'];
         // Get Suit
         let suit = deck[i]['suit'];
-        // ace 1F0A1 king 1F0AE joker 1F0CF
+
         console.log(`${String.fromCodePoint (0x1F0CF)} ${parseInt(i)+1}: ${card} of ${suit}`);
-        //game.client.say(game.channel, `${String.fromCodePoint (0x1F0CF)} ${parseInt(i)+1}: ${card} of ${suit}`);
     }
 }
 
 
 // Function to get cards from hand and display in a string
-// Parameters: hand, an array that holds 2 card objects
-// Returns: Twitch message from bot displaying username and their hand
-function displayHand(game, text, hand){
+// Parameters: hand, an array that holds 2 or more card objects
+// Returns: String, of formatted version of cards in hand
+function displayHand(hand){
     
     // Variable to store card and suit
-    let cards = []
-    let sep = String.fromCodePoint(0x1F0CF);
+    let cards = [];
+    // Variable to store card separator in string
+    const separator = String.fromCodePoint(0x1F0CF);
 
     for (const card of hand){
         let suit = '';
-        /* 
-        if (card['suit'] == 'Hearts') {suit = String.fromCodePoint(0x2764)}
-        else if (card['suit'] == 'Diamonds') {suit = String.fromCodePoint(0x2666)}
-        else if (card['suit'] == 'Clubs') {suit = String.fromCodePoint(0x2663)}
-        else if (card['suit'] == 'Spades') {suit = String.fromCodePoint(0x2660)}
-         */
-        if (card['suit'] == 'Hearts') {suit = ':hearts:'}
-        else if (card['suit'] == 'Diamonds') {suit = ':diamonds:'}
-        else if (card['suit'] == 'Clubs') {suit = ':clubs:'}
-        else if (card['suit'] == 'Spades') {suit = ':spades:'}
 
+        if (card['suit'] == 'Hearts') {suit = ':hearts:';}
+        else if (card['suit'] == 'Diamonds') {suit = ':diamonds:';}
+        else if (card['suit'] == 'Clubs') {suit = ':clubs:';}
+        else if (card['suit'] == 'Spades') {suit = ':spades:';}
+
+        // Add formatted string version to cards array
         cards.push(`${card['value']} of ${suit}`);
     }
 
-    game.client.say(game.channel, `${game.username} ${text} ${getHandTotal(hand)} ${sep} ${cards.join(` ${sep} `)}`);
+    return `${getHandTotal(hand)} ${separator} ${cards.join(` ${separator} `)}`;
 }
 
 
@@ -153,7 +118,7 @@ function displayHand(game, text, hand){
 function getHandTotal(hand){
 
     // variable used to sum the total value of cards in list storing cards
-    var total = 0
+    let total = 0;
 
     // This for loop translates the Ten, Ace and Picture cards into int values
     for (const card of hand){
@@ -174,7 +139,7 @@ function getHandTotal(hand){
             }
         }
     }
-    return total
+    return total;
 }
 
 
@@ -187,10 +152,8 @@ function dealOneCard(deck){
 }
 
 
-function getHitChoice(){
-        // TODO
-    //SIGN A GAME WITH USERS USER ID, IF A GAME IS RUNNING, CANNOT START ANOTHER ONE
-    // IF NO GAME IS RUNNING CANNOT !HIT OR ANYTHING
+function hitChoice(){
+
 } 
 
 
@@ -213,60 +176,151 @@ function checkWin(){
 }
 
 
-// Function to read temporary game data from temp file
-// Parameters: Game Objecting containing userID needed to read temp file
-// Returns: boolean depending on whether current game is active or not
-function isGameRunning(game){
+// Function to write temporary game data to a temp file
+// Parameters: Game Object containing userID and game data needed to create json file
+// Returns: nothing
+function writeGameData(game, boolean){
+    
+    // Update game active var
+    game.active = boolean;
 
-    console.log(`* Reading Game Data to /temp/${game.userID} value is ${fs.readFileSync(`./temp/${game.userID}`)}`)
+    // Create JS Object containing game data to write to file
+    const object = {
+        active: game.active,
+        playerHand: game.playerHand,
+        dealerHand: game.dealerHand,
+        deck: game.deck
+    };
 
-    // Read /temp/userID.file and return whether file contains true or false for if game running
-    return (fs.readFileSync(`./temp/${game.userID}`) == 'true') ? true : false
+    
+    try {
+        
+        // Convert object into JSON string
+        const data = JSON.stringify(object);
+
+        // Write JSON string into /temp/$userID.json
+        fs.writeFileSync(`./temp/${game.userID}.json`,`${data}`);
+        console.log(`* Writing data to /temp/${game.userID}.json`);
+    } 
+    catch(error) {
+        console.log(`* Woops! ${error.message}`);
+    }
+    
+    
+
 }
 
 
-// Function to write temporary game data to a temp file
-// Parameters: Game Object containing userID needed to name temp file
-// Returns: nothing
-function setGameRunning(game, boolean){
-    console.log(`* Writing ${boolean} to /temp/${game.userID}`)
-    fs.writeFileSync(`./temp/${game.userID}`,`${boolean}`)
+// Function to read game data from temp file
+// Parameters: userID, used to read the json from /temp/$userID.json
+// Returns: object, containing relevant game data
+function readGameData(userID){
+
+    // Read /temp/userID.file if function returns error, log error, else run function
+    try {
+        const data = fs.readFileSync(`./temp/${userID}.json`);
+        console.log(`* Reading Game Data from /temp/${userID}.json`);
+
+        // Parse JSON and convert into Javascript Object
+        const object = JSON.parse(data);
+
+        // Return object
+        return object;
+    }
+    catch(error) {
+        console.log(`* Woops! ${error.message}`);
+    }
+}
+
+// Function to check if a user currently has a game running
+// Parameters: userID used to check game data from /temp/$userID.json
+// Returns: boolean if user has a current game
+function isGameRunning(userID) {
+    try {
+        const gameObject = readGameData(userID);
+        return ((gameObject["active"] === true) ? true : false);
+    }
+    catch(error) {
+        console.log(`* Woops! Couldn't read game file [${error.message}]`);
+    }
+    
 }
 
 
 function initialize(channel, client, userstate){
 
-    const game = new Blackjack(channel, client, userstate, shuffleDeck(initialDeck));
-    setGameRunning(game, true)
-    for (let i=0; i<2; i++){
+    // Check if user currently has a game running
+    if (isGameRunning(userstate["user-id"])) { client.say(channel, `Sorry, @${userstate["display-name"]} you currently have a game running, use (!bj status) for the next action or (!bj quit) to delete the game`);
+    } else {
+        // Else create and run a game
+        const game = new Blackjack(channel, client, userstate, shuffleDeck(initialDeck));
+        
+        // Deal the cards
         game.playerHand.push(dealOneCard(game.deck));
+        game.dealerHand.push(dealOneCard(game.deck));
+        game.playerHand.push(dealOneCard(game.deck));
+        game.dealerHand.push(dealOneCard(game.deck));
+        
+        // Write game data to a file and set game active to true
+        writeGameData(game, true);
+
+        // Show user their own hand, if player hasn't stood their hand yet, hide the dealers second card
+        game.client.say(game.channel, `@${game.username} you have ${displayHand(game.playerHand)} dealer has ${(game.dealerHidden) ? displayHand(game.dealerHand.slice(0,1)) : displayHand(game.dealerHand)}`);
     }
-
-
-    displayHand(game, 'you have', game.playerHand);
-    
 }
 
-
-
-
+    /*****************    TODO     *********************
+        Implement !bj status and !bj quit
+        Implement Game functions past the initialization
+            * play player hand
+                * hit
+                * stand
+            * play dealer hand
+            * win conditions
+            * bust conditions
+    */
 
 
 // Called every time a message comes in
 function onMessageHandler (channel, userstate, message, self) {
-  if (self) { return; } // Ignore messages from the bot
+    if (self) { return; } // Ignore messages from the bot
 
-  // Remove whitespace from chat message
-  const commandName = message.trim();
+    // Remove whitespace from chat message
+    const commandName = (message.trim()).split(' ');
+
 
     // If message doesnt start with a ! mark, ignore it
-    if(!(commandName.startsWith('!'))) {return;}
+    if(!(commandName[0].startsWith('!'))) {return;}
     
-    // If !blackjack
-    else if (commandName === '!bj') {
-    initialize(channel, client, userstate);
-    console.log(`* Executed ${commandName} command`);
+    else if (commandName[0] === '!bj') {
+
+        // If !bj hit
+        if (commandName[1] === 'hit') {
+
+            // If user currently has a game running
+            if (isGameRunning(userstate["user-id"])) {
+                client.say(channel, `@${userstate["display-name"]} Woohoo you hit it!`);
+            } else {
+                client.say(channel, `Sorry, @${userstate["display-name"]} you dont have a game running use (!bj new) to create a new game`);
+            }
+
+            console.log(`* Executed ${commandName.join(' ')} command`);
+        } 
+        // If !bj new
+        else if (commandName[1] === 'new') { 
+            // initialize a new blackjack game for the user
+            initialize(channel, client, userstate);
+
+            console.log(`* Executed ${commandName.join(' ')} command`);
+        } 
+        // If unknown !bj command
+        else {
+            client.say(channel, `@${userstate["display-name"]} that's an unknown command try (!bj new) to start a new game or (!bj status) to check the status of a running game`);
+            console.log(`* Unknown !bj command notified user`);
+        }
+
     }
+
     // Else log unknown !command
     else {
     console.log(`* Unknown command ${commandName}`);
@@ -284,14 +338,16 @@ function onConnectedHandler (address, port) {
 // Returns: nothing
 cleanUp(function (exitCode, signal) {
 
-    console.log(`* Exiting . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .`)
+    console.log(`*  Exiting . . . . . . . . . ${exitCode} or ${signal}`);
 
     // Read file names from temp dir
-    const files = fs.readdirSync('./temp/')
+    let files = fs.readdirSync('./temp/');
 
     // Iterate over all temp files and delete them all
     for (const file of files){
-        fs.unlinkSync(`./temp/${file}`)
+        
+        fs.unlinkSync(`./temp/${file}`);
+        console.log(`* Removing /temp/${file} from file system`);
     }
 
     // Don't call cleanUp handler again, exit program
