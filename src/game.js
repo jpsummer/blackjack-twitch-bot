@@ -1,10 +1,9 @@
 export default function Game(channel, client, userstate){
 
-    this.gameActive = true
     this.channel = channel
     this.client = client
     this.username = userstate["display-name"]
-    this.userId = userstate["user-id"]
+    this.userID = userstate["user-id"]
     this.userType = userstate["user-type"]
     //this.isSub = userstate.subscriber
 

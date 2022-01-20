@@ -1,3 +1,4 @@
+import fs from 'fs';
 import tmi from 'tmi.js';
 import 'dotenv/config';
 import cleanUp from 'node-cleanup';
@@ -211,19 +212,36 @@ function checkWin(){
 
 }
 
-function checkGameRunning(){
 
+// Function to read temporary game data from temp file
+// Parameters: Game Objecting containing userID needed to read temp file
+// Returns: boolean depending on whether current game is active or not
+function isGameRunning(game){
+
+    console.log(`* Reading Game Data to /temp/${game.userID} value is ${fs.readFileSync(`./temp/${game.userID}`)}`)
+
+    // Read /temp/userID.file and return whether file contains true or false for if game running
+    return (fs.readFileSync(`./temp/${game.userID}`) == 'true') ? true : false
 }
+
+
+// Function to write temporary game data to a temp file
+// Parameters: Game Object containing userID needed to name temp file
+// Returns: nothing
+function setGameRunning(game, boolean){
+    console.log(`* Writing ${boolean} to /temp/${game.userID}`)
+    fs.writeFileSync(`./temp/${game.userID}`,`${boolean}`)
+}
+
 
 function initialize(channel, client, userstate){
 
     const game = new Blackjack(channel, client, userstate, shuffleDeck(initialDeck));
-
-    displayDeck(game, game.deck);
+    setGameRunning(game, true)
     for (let i=0; i<2; i++){
         game.playerHand.push(dealOneCard(game.deck));
     }
-    displayDeck(game, game.deck);
+
 
     displayHand(game, 'you have', game.playerHand);
     
@@ -261,7 +279,21 @@ function onConnectedHandler (address, port) {
   console.log(`* Connected to ${address}:${port} \n* On Channels: ${client.getOptions()['channels']}`);
 }
 
+// Function for what to do when the program exits either unexpectedly or via CTRL+C
+// Parameters: exitCode (exitCode 0 when exiting normally, exitcode 1 from unhandled exception) signal (SIGINT (e.g. Ctrl-C), SIGHUP, SIGQUIT, or SIGTERM.)
+// Returns: nothing
 cleanUp(function (exitCode, signal) {
-    console.log(`* Exiting . . . . . . . . . . . . . . . . . .`)
+
+    console.log(`* Exiting . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .`)
+
+    // Read file names from temp dir
+    const files = fs.readdirSync('./temp/')
+
+    // Iterate over all temp files and delete them all
+    for (const file of files){
+        fs.unlinkSync(`./temp/${file}`)
+    }
+
+    // Don't call cleanUp handler again, exit program
     cleanUp.uninstall();
 });
