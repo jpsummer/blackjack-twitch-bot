@@ -1,6 +1,6 @@
 {
   "name": "twitch-bj-bot",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "A Blackjack Game Bot for Twitch",
   "main": "src/bot.js",
   "type": "module",
