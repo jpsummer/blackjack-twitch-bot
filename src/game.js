@@ -4,7 +4,7 @@ export default function Game(twitch){
     this.client = twitch["client"]
     this.username = twitch["username"]
     this.userID = twitch["userID"]
-    this.userType = twitch["userstate"]["user-type"]
+    //this.userType = twitch["userstate"]["user-type"]
     //this.isSub = userstate.subscriber
 
 
@@ -30,7 +30,7 @@ export default function Game(twitch){
     subscriber: false,
     tmi-sent-ts: "1642595157114"
     turbo: true,
-    user_id: '58355428',
+    user_id: '27992961',
     user_type: 'mod',
     emotes_raw: '25:0-4',
     badges_raw: 'broadcaster/1,warcraft/horde',
