@@ -1,11 +1,10 @@
-export default function Game(channel, client, userstate){
+export default function Game(twitch){
 
-    this.active = false;
-    this.channel = channel
-    this.client = client
-    this.username = userstate["display-name"]
-    this.userID = userstate["user-id"]
-    this.userType = userstate["user-type"]
+    this.channel = twitch["channel"]
+    this.client = twitch["client"]
+    this.username = twitch["username"]
+    this.userID = twitch["userID"]
+    this.userType = twitch["userstate"]["user-type"]
     //this.isSub = userstate.subscriber
 
 

@@ -1,8 +1,8 @@
 import Game from './game.js';
 
-export default function Blackjack(channel, client, userstate, deck){
+export default function Blackjack(twitch, deck){
 
-    Game.call(this, channel, client, userstate)
+    Game.call(this, twitch)
     this.playerHand = []
     this.dealerHand = []
     this.dealerHidden = true;
