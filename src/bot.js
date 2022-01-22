@@ -285,7 +285,7 @@ function isGameRunning(userID) {
 function initialize(twitch){
 
     // Check if user currently has a game running
-    if (isGameRunning(twitch["userID"])) { twitch["client"].say(twitch["channel"], `@${twitch["username"]} you currently have a game running, finish the game or use !bj quit to delete the game`);
+    if (isGameRunning(twitch["userID"])) { twitch["client"].say(twitch["channel"], `@${twitch["username"]} you currently have a game running, finish the game or use !quit to delete the game`);
     } else {
         // Else create and run a game
         const game = new Blackjack(twitch, shuffleDeck(initialDeck));
@@ -326,13 +326,10 @@ function onMessageHandler (channel, userstate, message, self) {
 
     // If message doesnt start with a ! mark, ignore it
     if(!(commandName[0].startsWith('!'))) {return;}
-    
-    else if (commandName[0] === '!bj') {
 
 
-
-        // If !bj new
-        if (commandName[1] === 'new') { 
+        // If !new
+        if (commandName[0] === '!new') { 
             //console.log(`* Executing ${commandName.join(' ')} command`);
 
             // initialize a new blackjack game for the user
@@ -342,11 +339,11 @@ function onMessageHandler (channel, userstate, message, self) {
             // Check for blackjack, if Blackjack, Congratulate the player and remove the game
             if (getHandTotal(game.playerHand) == 21) {
                 removeGameData(game.userID);
-                twitch["client"].say(twitch["channel"], `@${game.username} Congratulations, you have Blackjack! ${displayHand(game.playerHand)} You won! type !bj new to play again`);
+                twitch["client"].say(twitch["channel"], `@${game.username} Congratulations, you have Blackjack! ${displayHand(game.playerHand)} You won! type !new to play again`);
             }
             // Else show user their own hand, and hide the dealers second card
             else {
-                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !bj hit or !bj stand?`);
+                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !hit or !stand?`);
             }
 
             console.log(`* Executed ${commandName.join(' ')} command`);
@@ -354,8 +351,8 @@ function onMessageHandler (channel, userstate, message, self) {
 
 
 
-        // If !bj hit
-        else if (commandName[1] === 'hit') {
+        // If !hit
+        else if (commandName[0] === '!hit') {
             //console.log(`* Executing ${commandName.join(' ')} command`);
 
             // If user currently has a game running
@@ -367,19 +364,19 @@ function onMessageHandler (channel, userstate, message, self) {
 
                 // If dealt card causes player to bust, notify player of loss and remove the game data
                 if (getHandTotal(game.playerHand) > 21){
-                    twitch["client"].say(twitch["channel"], `@${game.username} Bad Luck! You BUSTED with${displayHand(game.playerHand)} type !bj new to play again`);
+                    twitch["client"].say(twitch["channel"], `@${game.username} Bad Luck! You BUSTED with${displayHand(game.playerHand)} type !new to play again`);
                     removeGameData(game.userID);
                 }
                 // Else show player their cards and the dealers cards and write the new game data to file
                 else {
-                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !bj hit or !bj stand?`);
+                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !hit or !stand?`);
                 writeGameData(game);
                 }
 
             }
             // Else there is no game running notify user they can start a new one
             else {
-                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !bj new to create a new game`);
+                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !new to create a new game`);
             }
 
             console.log(`* Executed ${commandName.join(' ')} command`);
@@ -387,8 +384,8 @@ function onMessageHandler (channel, userstate, message, self) {
 
 
 
-        // If !bj stand
-        else if (commandName[1] === 'stand') {
+        // If !stand
+        else if (commandName[0] === '!stand') {
             //console.log(`* Executing ${commandName.join(' ')} command`);
 
             // If user currently has a game running
@@ -404,7 +401,7 @@ function onMessageHandler (channel, userstate, message, self) {
 
                 // If dealer busts, congratulate user and remove game data
                 if (getHandTotal(game.dealerHand) > 21) {
-                    twitch["client"].say(twitch["channel"], `@${game.username} Congratulations! Dealer has gone BUST! ${displayHand(game.dealerHand)} type !bj new to play again`);
+                    twitch["client"].say(twitch["channel"], `@${game.username} Congratulations! Dealer has gone BUST! ${displayHand(game.dealerHand)} type !new to play again`);
                     removeGameData(game.userID);
                 } 
                 // Else check win conditions and notify player if they lost, won or if game was a draw, then remove game data
@@ -412,21 +409,21 @@ function onMessageHandler (channel, userstate, message, self) {
                     const win = checkWin(game);
 
                     if (win === "player") {
-                        twitch["client"].say(twitch["channel"], `@${game.username} Congratulations! You won with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !bj new to play again`);
+                        twitch["client"].say(twitch["channel"], `@${game.username} Congratulations! You won with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !new to play again`);
                         removeGameData(game.userID);
                     }
                     else if (win === "dealer") {
-                        twitch["client"].say(twitch["channel"], `@${game.username} Bad Luck! You lost with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !bj new to play again`);
+                        twitch["client"].say(twitch["channel"], `@${game.username} Bad Luck! You lost with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !new to play again`);
                         removeGameData(game.userID);
                     } else {
-                        twitch["client"].say(twitch["channel"], `@${game.username} It's a DRAW! with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !bj new to play again`);
+                        twitch["client"].say(twitch["channel"], `@${game.username} It's a DRAW! with${displayHand(game.playerHand)} to the dealers${displayHand(game.dealerHand)} type !new to play again`);
                         removeGameData(game.userID);
                     }
                 }
             }
             // Else there is no game running notify user they can start a new one
             else {
-                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !bj new to create a new game`);
+                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !new to create a new game`);
             }
 
 
@@ -435,8 +432,8 @@ function onMessageHandler (channel, userstate, message, self) {
 
 
 
-        // If !bj status
-        else if (commandName[1] === 'status') {
+        // If !status
+        else if (commandName[0] === '!status') {
             //console.log(`* Executing ${commandName.join(' ')} command`);
 
             // If there is a game already running
@@ -444,11 +441,11 @@ function onMessageHandler (channel, userstate, message, self) {
                 // Read the game data
                 const game = readGameData(twitch["userID"]);
                 // Display current status of game to user
-                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !bj hit or !bj stand?`);
+                twitch["client"].say(twitch["channel"], `@${game.username} you have${displayHand(game.playerHand)} dealer has${(game.dealerHidden) ? `${displayHand(game.dealerHand.slice(0,1))} [??]` : displayHand(game.dealerHand)} do you !hit or !stand?`);
             } 
             // Else there is no game running notify user they can start a new one
             else {
-                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !bj new to create a new game`);
+                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !new to create a new game`);
             }
 
             console.log(`* Executed ${commandName.join(' ')} command`);
@@ -456,18 +453,18 @@ function onMessageHandler (channel, userstate, message, self) {
         
 
 
-        // If !bj quit
-        else if (commandName[1] === 'quit') {
+        // If !quit
+        else if (commandName[0] === '!quit') {
             //console.log(`* Executing ${commandName.join(' ')} command`);
 
             // If game is running, remove the game data and notify user that they can create a new game
             if (isGameRunning(twitch["userID"])) {
                 removeGameData(twitch["userID"]);
-                twitch["client"].say(twitch["channel"], `@${twitch["username"]} your game was deleted, type !bj new to create a new game`);
+                twitch["client"].say(twitch["channel"], `@${twitch["username"]} your game was deleted, type !new to create a new game`);
             }
             // Else there is no game running notify user they can start a new one
             else {
-                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !bj new to create a new game`);
+                twitch["client"].say(twitch["channel"], `@${twitch["username"]} you dont have a game running use !new to create a new game`);
             }
 
             console.log(`* Executed ${commandName.join(' ')} command`);
@@ -475,21 +472,11 @@ function onMessageHandler (channel, userstate, message, self) {
 
 
 
-        // If !bj info, notify user of basic info about the game
-        else if (commandName[1] === 'info') {
-            twitch["client"].say(twitch["channel"], `@${twitch["username"]} The game uses very basic Blackjack rules, the Dealer will only stand on 17 or higher and Dealer's 2nd card is hidden until player has stood their hand type !bj new to start a new game or !bj status to check the status of a running game`);
+        // If !help, notify user of basic info about the game
+        else if (commandName[0] === '!help') {
+            twitch["client"].say(twitch["channel"], `@${twitch["username"]} The game uses very basic Blackjack rules, the Dealer will only stand on 17 or higher and Dealer's 2nd card is hidden until player has stood their hand type !new to start a new game or !status to check the status of a running game`);
             console.log(`* Executed ${commandName.join(' ')} command`);
         }
-
-
-
-        // If unknown !bj command
-        else {
-            twitch["client"].say(twitch["channel"], `@${userstate["display-name"]} that's an unknown command try !bj info for the game rules, !bj new to start a new game or !bj status to check the status of a running game`);
-            console.log(`* Unknown !bj command notified user`);
-        }
-
-    }
 
     // Else log unknown !command
     else {
