@@ -2,6 +2,10 @@
   "name": "twitch-bj-bot",
   "version": "1.2.0",
   "description": "A Blackjack Game Bot for Twitch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpsummer/blackjack-twitch-bot"
+  },
   "main": "src/bot.js",
   "type": "module",
   "scripts": {
